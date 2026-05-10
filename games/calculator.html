@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算器 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container {
+            padding-top: 100px;
+            text-align: center;
+            min-height: 100vh;
+        }
+        .calculator {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            width: 320px;
+            margin: 30px auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        .display .expression {
+            color: #aaa;
+            font-size: 16px;
+            min-height: 24px;
+        }
+        .display .result {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .btn-calc {
+            padding: 18px;
+            font-size: 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .btn-number {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .btn-number:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .btn-operator {
+            background: rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+        }
+        .btn-operator:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+        .btn-clear {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+        .btn-clear:hover {
+            background: rgba(255, 107, 107, 0.5);
+        }
+        .btn-equals {
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            color: #000;
+            grid-column: span 2;
+        }
+        .btn-equals:hover {
+            transform: scale(1.02);
+        }
+        .btn-calc:active {
+            transform: scale(0.95);
+        }
+        .back-link {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 18px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../games.html">小游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <a href="../games.html" class="back-link">← 返回游戏列表</a>
+        <h1>🧮 计算器</h1>
+        <p style="color: #aaa;">支持基本的四则运算</p>
+        
+        <div class="calculator">
+            <div class="display">
+                <div class="expression" id="expression"></div>
+                <div class="result" id="result">0</div>
+            </div>
+            <div class="buttons">
+                <button class="btn-calc btn-clear" onclick="clearAll()">AC</button>
+                <button class="btn-calc btn-clear" onclick="backspace()">⌫</button>
+                <button class="btn-calc btn-operator" onclick="addOperator('%')">%</button>
+                <button class="btn-calc btn-operator" onclick="addOperator('/')">÷</button>
+                
+                <button class="btn-calc btn-number" onclick="addNumber('7')">7</button>
+                <button class="btn-calc btn-number" onclick="addNumber('8')">8</button>
+                <button class="btn-calc btn-number" onclick="addNumber('9')">9</button>
+                <button class="btn-calc btn-operator" onclick="addOperator('*')">×</button>
+                
+                <button class="btn-calc btn-number" onclick="addNumber('4')">4</button>
+                <button class="btn-calc btn-number" onclick="addNumber('5')">5</button>
+                <button class="btn-calc btn-number" onclick="addNumber('6')">6</button>
+                <button class="btn-calc btn-operator" onclick="addOperator('-')">−</button>
+                
+                <button class="btn-calc btn-number" onclick="addNumber('1')">1</button>
+                <button class="btn-calc btn-number" onclick="addNumber('2')">2</button>
+                <button class="btn-calc btn-number" onclick="addNumber('3')">3</button>
+                <button class="btn-calc btn-operator" onclick="addOperator('+')">+</button>
+                
+                <button class="btn-calc btn-number" onclick="addNumber('0')">0</button>
+                <button class="btn-calc btn-number" onclick="addNumber('.')">.</button>
+                <button class="btn-calc btn-equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 刘高奇的小家 - 个人网站</p>
+    </footer>
+
+    <script>
+        let currentInput = '0';
+        let expression = '';
+        let lastResult = null;
+        let newNumber = true;
+
+        function updateDisplay() {
+            document.getElementById('result').textContent = currentInput;
+            document.getElementById('expression').textContent = expression;
+        }
+
+        function addNumber(num) {
+            if (newNumber) {
+                currentInput = num === '.' ? '0.' : num;
+                newNumber = false;
+            } else {
+                if (num === '.' && currentInput.includes('.')) return;
+                currentInput += num;
+            }
+            updateDisplay();
+        }
+
+        function addOperator(op) {
+            if (lastResult !== null) {
+                expression = lastResult + ' ' + op + ' ';
+            } else {
+                expression = currentInput + ' ' + op + ' ';
+            }
+            lastResult = parseFloat(currentInput);
+            newNumber = true;
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (expression === '') return;
+            expression += currentInput;
+            try {
+                let result = eval(expression);
+                if (!isFinite(result)) {
+                    currentInput = '错误';
+                } else {
+                    currentInput = parseFloat(result.toFixed(10)).toString();
+                }
+            } catch (e) {
+                currentInput = '错误';
+            }
+            expression = '';
+            lastResult = null;
+            newNumber = true;
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            expression = '';
+            lastResult = null;
+            newNumber = true;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+                newNumber = true;
+            }
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
