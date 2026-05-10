@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记忆翻牌 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container {
+            padding-top: 100px;
+            text-align: center;
+            min-height: 100vh;
+        }
+        .memory-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(4, 80px);
+            gap: 10px;
+            margin: 30px auto;
+            width: fit-content;
+        }
+        .memory-card {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            user-select: none;
+        }
+        .memory-card:hover {
+            transform: scale(1.05);
+        }
+        .memory-card.flipped {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .memory-card.matched {
+            background: rgba(0, 212, 255, 0.3);
+            cursor: default;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            color: #000;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .back-link {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 18px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../games.html">小游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <a href="../games.html" class="back-link">← 返回游戏列表</a>
+        <h1>🃏 记忆翻牌</h1>
+        <p style="color: #aaa;">翻开两张牌，找到相同的图案！</p>
+        
+        <div class="stats">
+            <div>翻牌次数: <span id="moves">0</span></div>
+            <div>匹配对数: <span id="pairs">0</span>/8</div>
+        </div>
+        
+        <div class="memory-board" id="board"></div>
+        
+        <button class="btn" onclick="initGame()">重新开始</button>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 刘高奇的小家 - 个人网站</p>
+    </footer>
+
+    <script>
+        const emojis = ['🍎', '🍊', '🍋', '🍇', '🍉', '🍓', '🍑', '🍒'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let canFlip = true;
+
+        function initGame() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            canFlip = true;
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('pairs').textContent = '0';
+
+            const doubled = [...emojis, ...emojis];
+            doubled.sort(() => Math.random() - 0.5);
+
+            doubled.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.textContent = '❓';
+                card.addEventListener('click', () => flipCard(card));
+                board.appendChild(card);
+                cards.push(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+            if (flippedCards.length >= 2) return;
+
+            card.classList.add('flipped');
+            card.textContent = card.dataset.emoji;
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                canFlip = false;
+
+                if (flippedCards[0].dataset.emoji === flippedCards[1].dataset.emoji) {
+                    flippedCards[0].classList.add('matched');
+                    flippedCards[1].classList.add('matched');
+                    matchedPairs++;
+                    document.getElementById('pairs').textContent = matchedPairs;
+                    flippedCards = [];
+                    canFlip = true;
+
+                    if (matchedPairs === emojis.length) {
+                        setTimeout(() => alert('🎉 恭喜你完成了！翻牌次数: ' + moves), 300);
+                    }
+                } else {
+                    setTimeout(() => {
+                        flippedCards[0].classList.remove('flipped');
+                        flippedCards[1].classList.remove('flipped');
+                        flippedCards[0].textContent = '❓';
+                        flippedCards[1].textContent = '❓';
+                        flippedCards = [];
+                        canFlip = true;
+                    }, 1000);
+                }
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜拳游戏 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container {
+            padding-top: 100px;
+            text-align: center;
+            min-height: 100vh;
+        }
+        .choices {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .choice-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .choice-btn:hover {
+            transform: scale(1.1);
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.2);
+        }
+        .battle-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin: 30px 0;
+            font-size: 72px;
+        }
+        .player-choice, .computer-choice {
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+        .vs {
+            font-size: 36px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .result-display {
+            font-size: 32px;
+            margin: 20px 0;
+            min-height: 48px;
+        }
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+            font-size: 20px;
+        }
+        .score-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .score-item span {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            color: #000;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .back-link {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 18px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../games.html">小游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <a href="../games.html" class="back-link">← 返回游戏列表</a>
+        <h1>✂️ 猜拳游戏</h1>
+        <p style="color: #aaa;">石头剪刀布，和电脑一决高下！</p>
+
+        <div class="score-board">
+            <div class="score-item">你赢: <span id="playerScore">0</span></div>
+            <div class="score-item">平局: <span id="drawScore">0</span></div>
+            <div class="score-item">电脑赢: <span id="computerScore">0</span></div>
+        </div>
+
+        <div class="choices">
+            <button class="choice-btn" onclick="play('rock')">✊</button>
+            <button class="choice-btn" onclick="play('scissors')">✌️</button>
+            <button class="choice-btn" onclick="play('paper')">🖐️</button>
+        </div>
+
+        <div class="battle-area">
+            <div class="player-choice" id="playerDisplay">❓</div>
+            <div class="vs">VS</div>
+            <div class="computer-choice" id="computerDisplay">❓</div>
+        </div>
+
+        <div class="result-display" id="result"></div>
+
+        <button class="btn" onclick="resetScore()">重置分数</button>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 刘高奇的小家 - 个人网站</p>
+    </footer>
+
+    <script>
+        const emojis = {
+            rock: '✊',
+            scissors: '✌️',
+            paper: '🖐️'
+        };
+
+        let playerWins = 0;
+        let computerWins = 0;
+        let draws = 0;
+
+        function play(playerChoice) {
+            const choices = ['rock', 'scissors', 'paper'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+
+            document.getElementById('playerDisplay').textContent = emojis[playerChoice];
+            document.getElementById('computerDisplay').textContent = emojis[computerChoice];
+
+            let result = '';
+
+            if (playerChoice === computerChoice) {
+                result = '🤝 平局！';
+                draws++;
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper') ||
+                (playerChoice === 'paper' && computerChoice === 'rock')
+            ) {
+                result = '🎉 你赢了！';
+                playerWins++;
+            } else {
+                result = '😢 电脑赢了！';
+                computerWins++;
+            }
+
+            document.getElementById('result').textContent = result;
+            document.getElementById('playerScore').textContent = playerWins;
+            document.getElementById('computerScore').textContent = computerWins;
+            document.getElementById('drawScore').textContent = draws;
+        }
+
+        function resetScore() {
+            playerWins = 0;
+            computerWins = 0;
+            draws = 0;
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('computerScore').textContent = '0';
+            document.getElementById('drawScore').textContent = '0';
+            document.getElementById('playerDisplay').textContent = '❓';
+            document.getElementById('computerDisplay').textContent = '❓';
+            document.getElementById('result').textContent = '';
+        }
+    </script>
+</body>
+</html>
