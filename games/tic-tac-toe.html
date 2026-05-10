@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>井字棋 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container { padding: 120px 20px 60px; text-align: center; min-height: 100vh; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; margin: 30px auto; width: fit-content; }
+        .cell { width: 100px; height: 100px; background: var(--glass); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 48px; cursor: pointer; transition: all 0.3s; border-radius: 10px; }
+        .cell:hover { background: rgba(0,212,255,0.1); }
+        .cell.x { color: var(--primary); }
+        .cell.o { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <canvas id="starsCanvas"></canvas>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../games.html" class="active">小游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="main-content">
+        <div class="page-header">
+            <h1>⭕❌ 井字棋</h1>
+            <p>和电脑对战，看看谁能赢！</p>
+        </div>
+        <div class="game-container" style="padding-top: 20px;">
+            <div id="status" style="font-size: 22px; margin: 20px 0; min-height: 36px; color: var(--primary);">你的回合 (X)</div>
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div><div class="cell" data-index="1"></div><div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div><div class="cell" data-index="4"></div><div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div><div class="cell" data-index="7"></div><div class="cell" data-index="8"></div>
+            </div>
+            <button class="btn" onclick="resetGame()" style="margin-top: 20px;">重新开始</button>
+            <a href="../games.html" class="btn btn-outline" style="margin-left: 10px;">返回列表</a>
+        </div>
+    </div>
+    <footer class="footer"><p>&copy; 2026 刘高奇的小家</p></footer>
+    <script>
+        let board = Array(9).fill(''), gameActive = true;
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        cells.forEach(c => c.addEventListener('click', handleClick));
+        function handleClick(e) {
+            const i = e.target.dataset.index;
+            if (board[i] || !gameActive) return;
+            board[i] = 'X'; e.target.textContent = 'X'; e.target.classList.add('x');
+            if (checkWin('X')) { status.textContent = '🎉 你赢了！'; gameActive = false; return; }
+            if (board.every(c => c)) { status.textContent = '🤝 平局！'; gameActive = false; return; }
+            status.textContent = '电脑思考中...';
+            setTimeout(computerMove, 500);
+        }
+        function computerMove() {
+            let avail = board.map((c,i) => c ? null : i).filter(i => i !== null);
+            if (!avail.length) return;
+            const idx = avail[Math.floor(Math.random() * avail.length)];
+            board[idx] = 'O'; cells[idx].textContent = 'O'; cells[idx].classList.add('o');
+            if (checkWin('O')) { status.textContent = '😢 电脑赢了！'; gameActive = false; return; }
+            if (board.every(c => c)) { status.textContent = '🤝 平局！'; gameActive = false; return; }
+            status.textContent = '你的回合 (X)';
+        }
+        function checkWin(p) { return wins.some(w => w.every(i => board[i] === p)); }
+        function resetGame() { board = Array(9).fill(''); gameActive = true; status.textContent = '你的回合 (X)'; cells.forEach(c => { c.textContent = ''; c.classList.remove('x','o'); }); }
+    </script>
+</body>
+</html>

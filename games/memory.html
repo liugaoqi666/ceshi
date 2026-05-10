@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记忆翻牌 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container { padding: 120px 20px 60px; text-align: center; min-height: 100vh; }
+        .memory-board { display: grid; grid-template-columns: repeat(4, 80px); grid-template-rows: repeat(4, 80px); gap: 10px; margin: 30px auto; width: fit-content; }
+        .memory-card { width: 80px; height: 80px; background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,255,136,0.1)); border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 36px; cursor: pointer; transition: all 0.3s; }
+        .memory-card:hover { border-color: var(--primary); }
+        .memory-card.flipped { background: rgba(0,212,255,0.15); }
+        .memory-card.matched { background: rgba(0,255,136,0.2); border-color: var(--secondary); cursor: default; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin: 20px 0; font-size: 16px; }
+        .stats span { color: var(--primary); font-weight: 900; }
+    </style>
+</head>
+<body>
+    <canvas id="starsCanvas"></canvas>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../games.html" class="active">小游戏</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="main-content">
+        <div class="page-header">
+            <h1>🃏 记忆翻牌</h1>
+            <p>翻开两张牌，找到相同的图案！</p>
+        </div>
+        <div class="game-container" style="padding-top: 20px;">
+            <div class="stats">
+                <div>翻牌次数: <span id="moves">0</span></div>
+                <div>匹配对数: <span id="pairs">0</span>/8</div>
+            </div>
+            <div class="memory-board" id="board"></div>
+            <button class="btn" onclick="initGame()" style="margin-top: 20px;">重新开始</button>
+            <a href="../games.html" class="btn btn-outline" style="margin-left: 10px;">返回列表</a>
+        </div>
+    </div>
+    <footer class="footer"><p>&copy; 2026 刘高奇的小家</p></footer>
+    <script>
+        const emojis = ['🍎','🍊','🍋','🍇','🍉','🍓','🍑','🍒'];
+        let cards = [], flipped = [], matched = 0, moves = 0, canFlip = true;
+
+        function initGame() {
+            const board = document.getElementById('board'); board.innerHTML = '';
+            cards = []; flipped = []; matched = 0; moves = 0; canFlip = true;
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('pairs').textContent = '0';
+            const doubled = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            doubled.forEach((emoji, i) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card'; card.dataset.emoji = emoji;
+                card.textContent = '❓';
+                card.addEventListener('click', () => flip(card));
+                board.appendChild(card); cards.push(card);
+            });
+        }
+
+        function flip(card) {
+            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched') || flipped.length >= 2) return;
+            card.classList.add('flipped'); card.textContent = card.dataset.emoji;
+            flipped.push(card);
+            if (flipped.length === 2) {
+                moves++; document.getElementById('moves').textContent = moves; canFlip = false;
+                if (flipped[0].dataset.emoji === flipped[1].dataset.emoji) {
+                    flipped[0].classList.add('matched'); flipped[1].classList.add('matched');
+                    matched++; document.getElementById('pairs').textContent = matched;
+                    flipped = []; canFlip = true;
+                    if (matched === emojis.length) setTimeout(() => alert('🎉 恭喜完成！翻牌次数: ' + moves), 300);
+                } else {
+                    setTimeout(() => {
+                        flipped[0].classList.remove('flipped'); flipped[1].classList.remove('flipped');
+                        flipped[0].textContent = '❓'; flipped[1].textContent = '❓';
+                        flipped = []; canFlip = true;
+                    }, 1000);
+                }
+            }
+        }
+        initGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炫酷特效 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="trailCanvas"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="games.html">小游戏</a></li>
+                <li><a href="shop.html">电商购物</a></li>
+                <li><a href="education.html">教育管理</a></li>
+                <li><a href="sticky.html">便签版</a></li>
+                <li><a href="effects.html" class="active">炫酷特效</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>✨ 炫酷特效</h1>
+            <p>动态背景 · 声控可视化 · 下雪下雨效果</p>
+        </div>
+
+        <section class="effects-section">
+            <div class="effects-grid">
+                <!-- 动态波浪背景 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="waveCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>🌊 动态波浪背景</h3>
+                        <p>多层正弦波叠加，色彩渐变动效</p>
+                    </div>
+                </div>
+
+                <!-- 声控可视化 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="audioCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>🎤 声控可视化</h3>
+                        <p>点击下方按钮开启麦克风，用声音控制视觉效果</p>
+                        <button class="btn" onclick="toggleAudio()" id="audioBtn" style="font-size: 12px; padding: 8px 20px;">🎙️ 开启麦克风</button>
+                    </div>
+                </div>
+
+                <!-- 下雪效果 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="snowCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>❄️ 下雪效果</h3>
+                        <p>模拟真实雪花飘落，支持鼠标交互</p>
+                    </div>
+                </div>
+
+                <!-- 下雨效果 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="rainCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>🌧️ 下雨效果</h3>
+                        <p>模拟真实雨滴下落，带涟漪效果</p>
+                    </div>
+                </div>
+
+                <!-- 粒子漩涡 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="vortexCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>🌀 粒子漩涡</h3>
+                        <p>粒子围绕中心旋转，形成漩涡效果</p>
+                    </div>
+                </div>
+
+                <!-- 烟花效果 -->
+                <div class="effect-card">
+                    <div class="effect-preview">
+                        <canvas id="fireworkCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="effect-info">
+                        <h3>🎆 烟花效果</h3>
+                        <p>点击画布绽放烟花</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 刘高奇的小家 - 个人网站</p>
+    </footer>
+
+    <script>
+        // ========== 星空背景 ==========
+        (function() {
+            const canvas = document.getElementById('starsCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2, speedY: Math.random() * 0.3 + 0.1, opacity: Math.random() });
+            }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(s => {
+                    s.y += s.speedY;
+                    if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 212, 255, ${s.opacity})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        })();
+
+        // ========== 鼠标拖尾 ==========
+        (function() {
+            const canvas = document.getElementById('trailCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const particles = [];
+            document.addEventListener('mousemove', (e) => {
+                for (let i = 0; i < 3; i++) {
+                    particles.push({ x: e.clientX, y: e.clientY, size: Math.random() * 4 + 1, speedX: (Math.random() - 0.5) * 2, speedY: (Math.random() - 0.5) * 2, life: 1, color: `hsl(${Math.random() * 60 + 180}, 100%, 70%)` });
+                }
+            });
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.speedX; p.y += p.speedY; p.life -= 0.02; p.size *= 0.98;
+                    if (p.life <= 0) { particles.splice(i, 1); continue; }
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill(); ctx.globalAlpha = 1;
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        })();
+
+        // ========== 1. 动态波浪背景 ==========
+        (function() {
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            let time = 0;
+
+            const waves = [
+                { amplitude: 20, frequency: 0.02, speed: 0.03, color: 'rgba(0, 212, 255, 0.3)' },
+                { amplitude: 15, frequency: 0.03, speed: 0.02, color: 'rgba(0, 255, 136, 0.2)' },
+                { amplitude: 25, frequency: 0.015, speed: 0.04, color: 'rgba(108, 92, 231, 0.2)' },
+                { amplitude: 10, frequency: 0.04, speed: 0.025, color: 'rgba(253, 121, 168, 0.15)' }
+            ];
+
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                waves.forEach(wave => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, canvas.height);
+                    for (let x = 0; x <= canvas.width; x++) {
+                        const y = canvas.height / 2 + Math.sin(x * wave.frequency + time * wave.speed) * wave.amplitude
+                            + Math.sin(x * wave.frequency * 1.5 + time * wave.speed * 0.7) * wave.amplitude * 0.5;
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.lineTo(canvas.width, canvas.height);
+                    ctx.fillStyle = wave.color;
+                    ctx.fill();
+                });
+
+                time++;
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+
+        // ========== 2. 声控可视化 ==========
+        (function() {
+            const canvas = document.getElementById('audioCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            let audioContext, analyser, dataArray, isAudioActive = false;
+            let animationId;
+
+            window.toggleAudio = async function() {
+                const btn = document.getElementById('audioBtn');
+                if (!isAudioActive) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 256;
+                        const source = audioContext.createMediaStreamSource(stream);
+                        source.connect(analyser);
+                        dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        isAudioActive = true;
+                        btn.textContent = '🔴 关闭麦克风';
+                        drawAudio();
+                    } catch (err) {
+                        alert('无法访问麦克风，请检查权限设置！');
+                    }
+                } else {
+                    if (audioContext) {
+                        audioContext.close();
+                        cancelAnimationFrame(animationId);
+                    }
+                    isAudioActive = false;
+                    btn.textContent = '🎙️ 开启麦克风';
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawPlaceholder();
+                }
+            };
+
+            function drawPlaceholder() {
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.9)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#6666aa';
+                ctx.font = '14px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.fillText('点击下方按钮开启麦克风', canvas.width / 2, canvas.height / 2);
+            }
+
+            function drawAudio() {
+                if (!isAudioActive) return;
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barCount = dataArray.length;
+                const barWidth = canvas.width / barCount * 2;
+                const centerY = canvas.height / 2;
+
+                for (let i = 0; i < barCount; i++) {
+                    const value = dataArray[i] / 255;
+                    const barHeight = value * centerY * 0.8;
+                    const x = i * barWidth;
+                    const hue = 180 + (i / barCount) * 60;
+
+                    // 上半部分
+                    ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.5 + value * 0.5})`;
+                    ctx.fillRect(x, centerY - barHeight, barWidth - 2, barHeight);
+
+                    // 下半部分（镜像）
+                    ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + value * 0.3})`;
+                    ctx.fillRect(x, centerY, barWidth - 2, barHeight * 0.6);
+
+                    // 发光效果
+                    ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+                    ctx.shadowBlur = value * 15;
+                    ctx.fillRect(x, centerY - barHeight, barWidth - 2, 2);
+                    ctx.shadowBlur = 0;
+                }
+
+                // 中心线
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(canvas.width, centerY);
+                ctx.stroke();
+
+                animationId = requestAnimationFrame(drawAudio);
+            }
+
+            drawPlaceholder();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+
+        // ========== 3. 下雪效果 ==========
+        (function() {
+            const canvas = document.getElementById('snowCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            const snowflakes = [];
+            const count = 200;
+            let mouseX = -1000, mouseY = -1000;
+
+            for (let i = 0; i < count; i++) {
+                snowflakes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedY: Math.random() * 1 + 0.5,
+                    speedX: Math.random() * 0.5 - 0.25,
+                    opacity: Math.random() * 0.6 + 0.2,
+                    wobble: Math.random() * Math.PI * 2
+                });
+            }
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                mouseX = -1000;
+                mouseY = -1000;
+            });
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                snowflakes.forEach(s => {
+                    s.wobble += 0.01;
+                    s.x += s.speedX + Math.sin(s.wobble) * 0.5;
+                    s.y += s.speedY;
+
+                    // 鼠标交互 - 雪花被推开
+                    const dx = s.x - mouseX;
+                    const dy = s.y - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 50) {
+                        s.x += dx / dist * 2;
+                        s.y += dy / dist * 2;
+                    }
+
+                    if (s.y > canvas.height) {
+                        s.y = -5;
+                        s.x = Math.random() * canvas.width;
+                    }
+                    if (s.x > canvas.width) s.x = 0;
+                    if (s.x < 0) s.x = canvas.width;
+
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+                    ctx.shadowColor = 'rgba(200, 220, 255, 0.5)';
+                    ctx.shadowBlur = s.size * 2;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+
+        // ========== 4. 下雨效果 ==========
+        (function() {
+            const canvas = document.getElementById('rainCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            const drops = [];
+            const ripples = [];
+            const dropCount = 150;
+
+            for (let i = 0; i < dropCount; i++) {
+                drops.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    length: Math.random() * 15 + 10,
+                    speed: Math.random() * 5 + 8,
+                    thickness: Math.random() * 1.5 + 0.5,
+                    opacity: Math.random() * 0.4 + 0.1
+                });
+            }
+
+            function createRipple(x, y) {
+                ripples.push({
+                    x, y,
+                    radius: 0,
+                    maxRadius: Math.random() * 20 + 10,
+                    opacity: 0.5,
+                    speed: Math.random() * 0.5 + 0.3
+                });
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 雨滴
+                drops.forEach(d => {
+                    d.y += d.speed;
+                    d.x -= d.speed * 0.1;
+
+                    if (d.y > canvas.height) {
+                        createRipple(d.x, canvas.height);
+                        d.y = -d.length;
+                        d.x = Math.random() * canvas.width;
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(d.x, d.y);
+                    ctx.lineTo(d.x - d.speed * 0.1, d.y + d.length);
+                    ctx.strokeStyle = `rgba(150, 200, 255, ${d.opacity})`;
+                    ctx.lineWidth = d.thickness;
+                    ctx.stroke();
+                });
+
+                // 涟漪
+                for (let i = ripples.length - 1; i >= 0; i--) {
+                    const r = ripples[i];
+                    r.radius += r.speed;
+                    r.opacity -= 0.015;
+
+                    if (r.opacity <= 0) {
+                        ripples.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(150, 200, 255, ${r.opacity})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+
+        // ========== 5. 粒子漩涡 ==========
+        (function() {
+            const canvas = document.getElementById('vortexCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            const particles = [];
+            const count = 500;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * Math.min(canvas.width, canvas.height) * 0.4;
+                particles.push({
+                    angle,
+                    radius,
+                    speed: (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+                    size: Math.random() * 2 + 0.5,
+                    hue: 180 + Math.random() * 60,
+                    opacity: Math.random() * 0.7 + 0.3
+                });
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    p.angle += p.speed;
+                    p.radius += Math.sin(p.angle * 3) * 0.2;
+
+                    const x = centerX + Math.cos(p.angle) * p.radius;
+                    const y = centerY + Math.sin(p.angle) * p.radius;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.opacity})`;
+                    ctx.shadowColor = `hsl(${p.hue}, 100%, 60%)`;
+                    ctx.shadowBlur = 5;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+
+        // ========== 6. 烟花效果 ==========
+        (function() {
+            const canvas = document.getElementById('fireworkCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            const fireworks = [];
+            const particles = [];
+
+            function createFirework(x, y) {
+                const hue = Math.random() * 360;
+                const count = 80;
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 / count) * i;
+                    const speed = Math.random() * 4 + 2;
+                    particles.push({
+                        x, y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        size: Math.random() * 3 + 1,
+                        hue: hue + Math.random() * 30,
+                        life: 1,
+                        decay: Math.random() * 0.02 + 0.01
+                    });
+                }
+            }
+
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                createFirework(e.clientX - rect.left, e.clientY - rect.top);
+            });
+
+            // 自动烟花
+            setInterval(() => {
+                if (Math.random() > 0.5) {
+                    createFirework(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height * 0.6 + canvas.height * 0.1
+                    );
+                }
+            }, 2000);
+
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 0, 20, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05; // 重力
+                    p.vx *= 0.99;
+                    p.life -= p.decay;
+
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.life})`;
+                    ctx.shadowColor = `hsl(${p.hue}, 100%, 60%)`;
+                    ctx.shadowBlur = 10;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            });
+        })();
+    </script>
+</body>
+</html>

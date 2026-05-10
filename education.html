@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教育管理系统 - 刘高奇的小家</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="trailCanvas"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">🏠 刘高奇的小家</a>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="games.html">小游戏</a></li>
+                <li><a href="shop.html">电商购物</a></li>
+                <li><a href="education.html" class="active">教育管理</a></li>
+                <li><a href="sticky.html">便签版</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>📚 教育管理系统</h1>
+            <p>学生管理 · 课程管理 · 成绩管理</p>
+        </div>
+
+        <section class="edu-section">
+            <!-- 标签页 -->
+            <div class="edu-tabs">
+                <span class="edu-tab active" onclick="switchTab('dashboard', this)">📊 数据总览</span>
+                <span class="edu-tab" onclick="switchTab('students', this)">👨‍🎓 学生管理</span>
+                <span class="edu-tab" onclick="switchTab('courses', this)">📖 课程管理</span>
+                <span class="edu-tab" onclick="switchTab('grades', this)">📝 成绩管理</span>
+            </div>
+
+            <!-- 数据总览 -->
+            <div class="tab-panel active" id="panel-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍🎓</div>
+                        <div class="stat-number" id="totalStudents">6</div>
+                        <div class="stat-label">学生总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📖</div>
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">课程总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍🏫</div>
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">教师总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number">82</div>
+                        <div class="stat-label">平均分</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 20px; color: var(--primary); font-size: 16px;">📈 各科目平均成绩</h3>
+                    <div class="bar-chart" id="barChart"></div>
+                </div>
+            </div>
+
+            <!-- 学生管理 -->
+            <div class="tab-panel" id="panel-students">
+                <div class="toolbar">
+                    <input type="text" id="studentSearch" placeholder="搜索学生姓名..." oninput="searchStudents()">
+                    <select id="classFilter" onchange="searchStudents()">
+                        <option value="all">全部班级</option>
+                        <option value="一班">一班</option>
+                        <option value="二班">二班</option>
+                        <option value="三班">三班</option>
+                    </select>
+                    <button class="btn" onclick="showAddStudent()">+ 添加学生</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>学号</th>
+                                <th>姓名</th>
+                                <th>班级</th>
+                                <th>年龄</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 课程管理 -->
+            <div class="tab-panel" id="panel-courses">
+                <div class="toolbar">
+                    <button class="btn" onclick="showAddCourse()">+ 添加课程</button>
+                </div>
+                <div class="courses-grid" id="coursesGrid"></div>
+            </div>
+
+            <!-- 成绩管理 -->
+            <div class="tab-panel" id="panel-grades">
+                <div class="toolbar">
+                    <select id="gradeStudent" onchange="showStudentGrades()">
+                        <option value="">选择学生</option>
+                    </select>
+                    <button class="btn" onclick="showAddGrade()">+ 录入成绩</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>学生</th>
+                                <th>课程</th>
+                                <th>成绩</th>
+                                <th>等级</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 添加学生模态框 -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal-box">
+            <h2 id="studentModalTitle">添加学生</h2>
+            <input type="hidden" id="editStudentId">
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" id="studentName" placeholder="请输入姓名">
+            </div>
+            <div class="form-group">
+                <label>班级</label>
+                <select id="studentClass">
+                    <option value="一班">一班</option>
+                    <option value="二班">二班</option>
+                    <option value="三班">三班</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>年龄</label>
+                <input type="number" id="studentAge" placeholder="请输入年龄">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeStudentModal()">取消</button>
+                <button class="btn" onclick="saveStudent()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加课程模态框 -->
+    <div class="modal-overlay" id="courseModal">
+        <div class="modal-box">
+            <h2>添加课程</h2>
+            <div class="form-group">
+                <label>课程名称</label>
+                <input type="text" id="courseName" placeholder="请输入课程名称">
+            </div>
+            <div class="form-group">
+                <label>授课教师</label>
+                <input type="text" id="courseTeacher" placeholder="请输入授课教师">
+            </div>
+            <div class="form-group">
+                <label>学分</label>
+                <input type="number" id="courseCredits" placeholder="请输入学分">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeCourseModal()">取消</button>
+                <button class="btn" onclick="saveCourse()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加成绩模态框 -->
+    <div class="modal-overlay" id="gradeModal">
+        <div class="modal-box">
+            <h2>录入成绩</h2>
+            <div class="form-group">
+                <label>学生</label>
+                <select id="gradeStudentSelect"></select>
+            </div>
+            <div class="form-group">
+                <label>课程</label>
+                <select id="gradeCourseSelect"></select>
+            </div>
+            <div class="form-group">
+                <label>成绩</label>
+                <input type="number" id="gradeValue" placeholder="请输入成绩(0-100)" min="0" max="100">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeGradeModal()">取消</button>
+                <button class="btn" onclick="saveGrade()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 刘高奇的小家 - 个人网站</p>
+    </footer>
+
+    <script>
+        // ========== 星空背景 ==========
+        (function() {
+            const canvas = document.getElementById('starsCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2, speedY: Math.random() * 0.3 + 0.1, opacity: Math.random() });
+            }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(s => {
+                    s.y += s.speedY;
+                    if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 212, 255, ${s.opacity})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        })();
+
+        // ========== 鼠标拖尾 ==========
+        (function() {
+            const canvas = document.getElementById('trailCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const particles = [];
+            document.addEventListener('mousemove', (e) => {
+                for (let i = 0; i < 3; i++) {
+                    particles.push({ x: e.clientX, y: e.clientY, size: Math.random() * 4 + 1, speedX: (Math.random() - 0.5) * 2, speedY: (Math.random() - 0.5) * 2, life: 1, color: `hsl(${Math.random() * 60 + 180}, 100%, 70%)` });
+                }
+            });
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.speedX; p.y += p.speedY; p.life -= 0.02; p.size *= 0.98;
+                    if (p.life <= 0) { particles.splice(i, 1); continue; }
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill(); ctx.globalAlpha = 1;
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        })();
+
+        // ========== 数据存储 ==========
+        let students = [
+            { id: 1, name: '张三', class: '一班', age: 20, status: 'active' },
+            { id: 2, name: '李四', class: '一班', age: 21, status: 'active' },
+            { id: 3, name: '王五', class: '二班', age: 19, status: 'active' },
+            { id: 4, name: '赵六', class: '二班', age: 22, status: 'inactive' },
+            { id: 5, name: '孙七', class: '三班', age: 20, status: 'active' },
+            { id: 6, name: '周八', class: '三班', age: 21, status: 'active' },
+        ];
+
+        let courses = [
+            { id: 1, name: '高等数学', teacher: '王教授', credits: 4, icon: '📐' },
+            { id: 2, name: '英语', teacher: '李老师', credits: 3, icon: '🔤' },
+            { id: 3, name: '计算机基础', teacher: '张老师', credits: 3, icon: '💻' },
+            { id: 4, name: '数据结构', teacher: '刘老师', credits: 4, icon: '📊' },
+            { id: 5, name: '软件测试', teacher: '陈老师', credits: 3, icon: '🔍' },
+            { id: 6, name: 'Web开发', teacher: '赵老师', credits: 3, icon: '🌐' },
+        ];
+
+        let grades = [
+            { studentId: 1, courseId: 1, score: 85 },
+            { studentId: 1, courseId: 2, score: 78 },
+            { studentId: 1, courseId: 3, score: 92 },
+            { studentId: 2, courseId: 1, score: 72 },
+            { studentId: 2, courseId: 3, score: 88 },
+            { studentId: 2, courseId: 4, score: 65 },
+            { studentId: 3, courseId: 2, score: 90 },
+            { studentId: 3, courseId: 5, score: 82 },
+            { studentId: 3, courseId: 6, score: 95 },
+            { studentId: 4, courseId: 1, score: 55 },
+            { studentId: 4, courseId: 4, score: 68 },
+            { studentId: 5, courseId: 3, score: 78 },
+            { studentId: 5, courseId: 5, score: 88 },
+            { studentId: 5, courseId: 6, score: 91 },
+            { studentId: 6, courseId: 1, score: 80 },
+            { studentId: 6, courseId: 2, score: 75 },
+            { studentId: 6, courseId: 4, score: 85 },
+        ];
+
+        let nextStudentId = 7;
+        let nextCourseId = 7;
+
+        // ========== Tab切换 ==========
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.edu-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('panel-' + tabName).classList.add('active');
+
+            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'students') renderStudents();
+            if (tabName === 'courses') renderCourses();
+            if (tabName === 'grades') renderGrades();
+        }
+
+        // ========== 数据总览 ==========
+        function renderDashboard() {
+            document.getElementById('totalStudents').textContent = students.filter(s => s.status === 'active').length;
+            renderBarChart();
+        }
+
+        function renderBarChart() {
+            const chart = document.getElementById('barChart');
+            const courseAverages = courses.map(course => {
+                const courseGrades = grades.filter(g => g.courseId === course.id);
+                const avg = courseGrades.length > 0
+                    ? Math.round(courseGrades.reduce((sum, g) => sum + g.score, 0) / courseGrades.length)
+                    : 0;
+                return { name: course.name, avg, icon: course.icon };
+            });
+
+            const colors = ['#00d4ff', '#00ff88', '#ff6b6b', '#ffd93d', '#6c5ce7', '#fd79a8'];
+            chart.innerHTML = courseAverages.map((item, i) => `
+                <div class="bar-item">
+                    <div class="bar" style="height: ${item.avg * 2.5}px; background: ${colors[i % colors.length]};">
+                        <span class="bar-value">${item.avg}</span>
+                    </div>
+                    <div class="bar-label">${item.icon}<br>${item.name}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 学生管理 ==========
+        function renderStudents() {
+            const search = document.getElementById('studentSearch').value;
+            const classFilter = document.getElementById('classFilter').value;
+            let filtered = students;
+
+            if (search) filtered = filtered.filter(s => s.name.includes(search));
+            if (classFilter !== 'all') filtered = filtered.filter(s => s.class === classFilter);
+
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = filtered.map(s => `
+                <tr>
+                    <td>STU${String(s.id).padStart(4, '0')}</td>
+                    <td>${s.name}</td>
+                    <td>${s.class}</td>
+                    <td>${s.age}</td>
+                    <td><span class="status-badge ${s.status === 'active' ? 'status-active' : 'status-inactive'}">${s.status === 'active' ? '在读' : '休学'}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="editStudent(${s.id})">编辑</button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteStudent(${s.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchStudents() {
+            renderStudents();
+        }
+
+        function showAddStudent() {
+            document.getElementById('studentModalTitle').textContent = '添加学生';
+            document.getElementById('editStudentId').value = '';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentClass').value = '一班';
+            document.getElementById('studentAge').value = '';
+            document.getElementById('studentModal').classList.add('show');
+        }
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+            document.getElementById('studentModalTitle').textContent = '编辑学生';
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('studentClass').value = student.class;
+            document.getElementById('studentAge').value = student.age;
+            document.getElementById('studentModal').classList.add('show');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.remove('show');
+        }
+
+        function saveStudent() {
+            const editId = document.getElementById('editStudentId').value;
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value;
+            const age = parseInt(document.getElementById('studentAge').value);
+
+            if (!name || !age) {
+                alert('请填写完整信息！');
+                return;
+            }
+
+            if (editId) {
+                const student = students.find(s => s.id === parseInt(editId));
+                if (student) {
+                    student.name = name;
+                    student.class = cls;
+                    student.age = age;
+                }
+            } else {
+                students.push({ id: nextStudentId++, name, class: cls, age, status: 'active' });
+            }
+
+            closeStudentModal();
+            renderStudents();
+        }
+
+        function deleteStudent(id) {
+            if (confirm('确定要删除该学生吗？')) {
+                students = students.filter(s => s.id !== id);
+                grades = grades.filter(g => g.studentId !== id);
+                renderStudents();
+            }
+        }
+
+        // ========== 课程管理 ==========
+        function renderCourses() {
+            const grid = document.getElementById('coursesGrid');
+            grid.innerHTML = courses.map(c => `
+                <div class="course-card">
+                    <div class="course-icon">${c.icon}</div>
+                    <h3>${c.name}</h3>
+                    <p>授课教师: ${c.teacher}</p>
+                    <div class="course-meta">
+                        <span>学分: ${c.credits}</span>
+                        <span>选课人数: ${grades.filter(g => g.courseId === c.id).length}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddCourse() {
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseTeacher').value = '';
+            document.getElementById('courseCredits').value = '';
+            document.getElementById('courseModal').classList.add('show');
+        }
+
+        function closeCourseModal() {
+            document.getElementById('courseModal').classList.remove('show');
+        }
+
+        function saveCourse() {
+            const name = document.getElementById('courseName').value.trim();
+            const teacher = document.getElementById('courseTeacher').value.trim();
+            const credits = parseInt(document.getElementById('courseCredits').value);
+
+            if (!name || !teacher || !credits) {
+                alert('请填写完整信息！');
+                return;
+            }
+
+            const icons = ['📐', '🔤', '💻', '📊', '🔍', '🌐', '🎨', '🎵', '🏃', '🧪'];
+            courses.push({
+                id: nextCourseId++,
+                name,
+                teacher,
+                credits,
+                icon: icons[Math.floor(Math.random() * icons.length)]
+            });
+
+            closeCourseModal();
+            renderCourses();
+        }
+
+        // ========== 成绩管理 ==========
+        function renderGrades() {
+            const studentSelect = document.getElementById('gradeStudent');
+            const currentVal = studentSelect.value;
+            studentSelect.innerHTML = '<option value="">选择学生</option>' +
+                students.map(s => `<option value="${s.id}">${s.name} (${s.class})</option>`).join('');
+            studentSelect.value = currentVal;
+
+            showStudentGrades();
+        }
+
+        function showStudentGrades() {
+            const studentId = document.getElementById('gradeStudent').value;
+            let filtered = grades;
+            if (studentId) filtered = grades.filter(g => g.studentId === parseInt(studentId));
+
+            const tbody = document.getElementById('gradeTableBody');
+            tbody.innerHTML = filtered.map(g => {
+                const student = students.find(s => s.id === g.studentId);
+                const course = courses.find(c => c.id === g.courseId);
+                let level = '';
+                let levelColor = '';
+                if (g.score >= 90) { level = '优秀'; levelColor = '#00ff88'; }
+                else if (g.score >= 80) { level = '良好'; levelColor = '#00d4ff'; }
+                else if (g.score >= 70) { level = '中等'; levelColor = '#ffd93d'; }
+                else if (g.score >= 60) { level = '及格'; levelColor = '#ffa502'; }
+                else { level = '不及格'; levelColor = '#ff6b6b'; }
+
+                return `
+                    <tr>
+                        <td>${student ? student.name : '未知'}</td>
+                        <td>${course ? course.name : '未知'}</td>
+                        <td style="font-weight: 900;">${g.score}</td>
+                        <td><span style="color: ${levelColor}; font-weight: 700;">${level}</span></td>
+                        <td><button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteGrade(${g.studentId}, ${g.courseId})">删除</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showAddGrade() {
+            const studentSelect = document.getElementById('gradeStudentSelect');
+            studentSelect.innerHTML = students.map(s => `<option value="${s.id}">${s.name} (${s.class})</option>`).join('');
+
+            const courseSelect = document.getElementById('gradeCourseSelect');
+            courseSelect.innerHTML = courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            document.getElementById('gradeValue').value = '';
+            document.getElementById('gradeModal').classList.add('show');
+        }
+
+        function closeGradeModal() {
+            document.getElementById('gradeModal').classList.remove('show');
+        }
+
+        function saveGrade() {
+            const studentId = parseInt(document.getElementById('gradeStudentSelect').value);
+            const courseId = parseInt(document.getElementById('gradeCourseSelect').value);
+            const score = parseInt(document.getElementById('gradeValue').value);
+
+            if (isNaN(score) || score < 0 || score > 100) {
+                alert('请输入有效的成绩(0-100)！');
+                return;
+            }
+
+            const existing = grades.find(g => g.studentId === studentId && g.courseId === courseId);
+            if (existing) {
+                alert('该学生已有此课程成绩，请先删除后重新录入！');
+                return;
+            }
+
+            grades.push({ studentId, courseId, score });
+            closeGradeModal();
+            renderGrades();
+        }
+
+        function deleteGrade(studentId, courseId) {
+            if (confirm('确定要删除该成绩记录吗？')) {
+                grades = grades.filter(g => !(g.studentId === studentId && g.courseId === courseId));
+                renderGrades();
+            }
+        }
+
+        // 初始化
+        renderDashboard();
+    </script>
+</body>
+</html>
